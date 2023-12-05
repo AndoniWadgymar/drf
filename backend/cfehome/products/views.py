@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import generics, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -41,6 +41,21 @@ class ProductDestroyAPIView(generics.DestroyAPIView):
   def perform_destroy(self, instance):
     return super().perform_destroy(instance)
 
+# This is the way the API Class based Views work
+class ProductMixinView(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+  queryset = Product.objects.all()
+  serializer_class = ProductSerializer
+  lookup_field = 'pk'
+
+  def get(self, request, *args, **kwargs):
+    print(args, kwargs)
+    pk = kwargs.get('pk')
+    if pk is not None:
+      return self.retrieve(request, *args, **kwargs)
+    return self.list(request, *args, *kwargs)
+
+  def post(self, request, *args, **kwargs):
+    return self.create(request, *args, **kwargs)
 
 
 # We can create a function view that gets details, gets list, and post all in one
