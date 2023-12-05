@@ -23,6 +23,26 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
     print(serializer)
     serializer.save()
 
+class ProductUpdateAPIView(generics.UpdateAPIView):
+  queryset = Product.objects.all()
+  serializer_class = ProductSerializer
+  lookup_field = 'pk'
+
+  def perform_update(self, serializer):
+    instance =  serializer.save()
+    if not instance.content:
+      instance.content = instance.title
+
+class ProductDestroyAPIView(generics.DestroyAPIView):
+  queryset = Product.objects.all()
+  serializer_class = ProductSerializer
+  lookup_field = 'pk'
+
+  def perform_destroy(self, instance):
+    return super().perform_destroy(instance)
+
+
+
 # We can create a function view that gets details, gets list, and post all in one
 @api_view(['GET', 'POST'])
 def product_alt_view(request, pk=None, *args, **kwargs):
