@@ -1,4 +1,4 @@
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions, authentication
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 
 from products.models import Product
 from products.serializers import ProductSerializer
+from products.permissions import IsStaffEditorPermission
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
   queryset = Product.objects.all()
@@ -16,6 +17,9 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
 class ProductListCreateAPIView(generics.ListCreateAPIView):
   queryset = Product.objects.all()
   serializer_class = ProductSerializer
+  # Authentication and permisions to create or list products
+  authentication_classes = [authentication.SessionAuthentication, authentication.TokenAuthentication]
+  permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
 # Used when aditional functions want to be run on create
   def perform_create(self, serializer):
@@ -27,6 +31,8 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
   queryset = Product.objects.all()
   serializer_class = ProductSerializer
   lookup_field = 'pk'
+  permission_classes = [permissions.DjangoModelPermissions]
+
 
   def perform_update(self, serializer):
     instance =  serializer.save()
